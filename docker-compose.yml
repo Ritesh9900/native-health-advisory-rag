@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  health-advisory-api:
+    build: .
+    container_name: native_health_advisory_api
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-gemini}
+    volumes:
+      - ./qdrant_storage:/app/qdrant_storage
+      - ./hf_cache:/app/hf_cache
+    restart: unless-stopped
+
+  health-advisory-ui:
+    build: .
+    container_name: native_health_advisory_ui
+    ports:
+      - "8501:8501"
+    command: ["streamlit", "run", "src/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    volumes:
+      - ./qdrant_storage:/app/qdrant_storage
+      - ./hf_cache:/app/hf_cache
+    depends_on:
+      - health-advisory-api
+    restart: unless-stopped

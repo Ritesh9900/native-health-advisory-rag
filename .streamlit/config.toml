@@ -1,0 +1,12 @@
+[server]
+headless = true
+fileWatcherType = "poll"
+folderWatchBlacklist = [
+    "**/site-packages/**",
+    "**/.venv/**",
+    "**/hf_cache/**",
+    "**/pip_cache/**"
+]
+
+[browser]
+gatherUsageStats = false

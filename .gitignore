@@ -1,0 +1,20 @@
+# Secrets (Never push API keys)
+.env
+.env.local
+
+# Virtual Environment
+.venv/
+venv/
+
+# Heavy Model and Pip Caches
+hf_cache/
+pip_cache/
+qdrant_storage/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# IDE configs
+.vscode/
+.idea/
