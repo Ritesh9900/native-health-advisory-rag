@@ -21,9 +21,22 @@ class MedicalRetriever:
         from qdrant_client import QdrantClient
 
         self.model_name = Config.EMBEDDING_MODEL_NAME
-        self.embedder = embedder or SentenceTransformer(self.model_name)
         self.client = qdrant_client or QdrantClient(path=Config.QDRANT_STORAGE_PATH)
         self.collection_name = Config.QDRANT_COLLECTION_NAME
+
+        # Resilient Cloud Cold-Start: Automatically populate collection if missing
+        try:
+            collections = [c.name for c in self.client.get_collections().collections]
+            if self.collection_name not in collections:
+                print(f"[Retriever] Collection '{self.collection_name}' not found. Auto-running ingestion...")
+                from src.rag.ingest import MedicalDocumentIngestor
+                ingestor = MedicalDocumentIngestor(
+                    storage_path=Config.QDRANT_STORAGE_PATH,
+                    collection_name=self.collection_name
+                )
+                ingestor.run_ingestion()
+        except Exception as e:
+            print(f"[Retriever Auto-Ingest Notice]: {e}")
 
     def retrieve(self, query: str, top_k: int = Config.TOP_K, min_score: float = Config.SIMILARITY_THRESHOLD) -> List[Dict[str, Any]]:
         # Encode query
